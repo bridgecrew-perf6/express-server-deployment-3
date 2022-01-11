@@ -19,24 +19,64 @@ class Message {
 // takes in a route and a callback function that has the request and response
 app.get('/message', (request, response) => {
   //do something with request and return response
-  console.log(`request - ${request.method}`);
+  console.log(`request from client - ${request.method}`);
 
   response.send(messages);
 
 });
 
-// POST -> http://localhost:3000/message?text=test&author=michael
-app.post('/message', (request, response, next) => {
-  //do something with request and return response
-  const messageText = request.query.text;
-  const authorName = request.query.author;
+function createMessage(req, res, next) {
+  const messageText = req.query.text;
+  const authorName = req.query.author;
 
-  next('an error has occurred');
+  console.log('First Message Created!');
 
-  const message = new Message(messageText, authorName);
+  if (!messageText || !authorName) {
+    next('Missing Information');
+  } else {
+    const message = new Message(messageText, authorName);
+
+    //cnanging the request to what we want it to now be
+    req.message = message;
+    next();
+  }
+}
+
+function saveMessage(req, res, next) {
+  console.log('any data that was added to the request', req.message);
+  let message = req.message;
   messages.push(message);
-  response.send(message);
+  next();
+}
+
+// POST -> http://localhost:3000/message?text=test&author=michael
+app.post('/message', createMessage, saveMessage, (request, response, next) => {
+  //do something with request and return response
+  // const messageText = request.query.text;
+  // const authorName = request.query.author;
+
+  // const message = new Message(messageText, authorName);
+  // messages.push(message);
+  response.send(messages);
 
 });
 
-module.exports = app;
+app.use = (err, req, res, next) => {
+  console.log(err);
+  res.send('error handler hit');
+};
+
+// runs only if no others from above can
+app.use = (req, res) => {
+  res.status(404).send('couldnt find anythin');
+};
+
+//module.exports = app;
+module.exports = {
+  start: function (port) {
+    app.listen(port, () => {
+      console.log(`listening on port ${port}`);
+    });
+  },
+  app,
+};
