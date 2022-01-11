@@ -2,7 +2,9 @@
 
 HTTP Express server deployed on heroku
 
-Deployment URL:
+Deployment URL (dev branch): https://express-server-deploymentt.herokuapp.com/
+
+Deployment URL (main branch): https://express-server-deployment-main.herokuapp.com/
 
 ## Installation
 
